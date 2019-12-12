@@ -1,0 +1,83 @@
+# ubuntu16.04-nginx-mysql-php5.6
+How to install nginx, mysql, php 5.6 in Ubuntu 16.04
+
+Step 1:
+  $ sudo add-apt-repository ppa:ondrej/nginx-mainline or /nginx
+
+Step 2:
+  $ sudo apt-get update
+  
+Step 3:
+  $ sudo apt install -y nginx mysql-server php5.6 php5.6-mysql php5.6 php5.6-fpm git
+  
+Step 4:
+  $ sudo mysql_secure_installation
+  
+Step 5:
+  $ sudo systemctl restart php5.6-fpm
+  
+Step 6: Configure the PHP processor
+  $ sudo nano /etc/php/5.6/fpm/php.init
+  ctl+w
+  type: cgi.fix_pathinfo=1
+  change: cgi.fix_pathinfo=0
+  ctl+x
+  Press y
+  Enter
+  $ sudo systemctl restart php5.6-fpm
+  
+Step 6: Configure nginx to use the php processor
+  $ sudo nano /etc/nginx/sites-available/default
+  
+  Change to this:
+    server {
+      listen 80 default_server;
+      listen [::]:80 default_server;
+
+      root /var/www/html;
+      index index.php index.html index.htm index.nginx-debian.html;
+
+      server_name server_domain_or_IP;
+
+      location / {
+          try_files $uri $uri/ =404;
+      }
+
+      location ~ \.php$ {
+          include snippets/fastcgi-php.conf;
+          fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+      }
+
+      location ~ /\.ht {
+          deny all;
+      }
+    }
+  
+  ctl+x
+  Press y
+  Enter
+  
+Step 7: Test your configuration
+  $ sudo nginx -t
+  
+  If any errors are reported, go back and recheck your file before continuing.
+  
+Step 8: Reload nginx
+  $ sudo systemctl reload nginx
+  
+Step 9: Create a php file to test configuration
+  $ sudo nano /var/www/html/info.php
+  
+  type:
+  <?php
+    phpinfo();
+  
+  ctl+x
+  Press y
+  Enter
+  
+Step 10: Open Browser
+  type: http://localhot/info.php
+  
+Step 11: Remove info.php
+  $ sudo rm /var/www/html/info.php
